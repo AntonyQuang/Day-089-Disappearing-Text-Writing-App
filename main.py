@@ -26,17 +26,39 @@ def countdown():
     timer.insert(0, str(time))
     if time > 0:
         root.after(1000, countdown)
+    else:
+        return game_over()
 
 
 def typing(event):
-    if text_box.get("1.0", "1.1") == "":
-        root.after(1000, countdown)
-    else:
-        global time
-        print(text_box.get("1.0", END))
-        time = time_limit
-        timer.delete(0, END)
-        timer.insert(0, str(time))
+    # To prevent any cheating by spamming "shift" or "ctrl"
+    if event.char or event.keysym == "Enter":
+        if text_box.get("1.0", "1.1") == "":
+            root.after(1000, countdown)
+        else:
+            global time
+            time = time_limit
+            timer.delete(0, END)
+            timer.insert(0, str(time))
+
+
+def game_over():
+    global time
+    explanation.focus()
+    text_box.delete("1.0", "end")
+    text_box.configure(state="disabled")
+    time = 0
+    timer.delete(0, END)
+    timer.insert(0, str(time))
+
+
+def reset():
+    global time
+    time = time_limit
+    timer.delete(0, END)
+    timer.insert(0, str(time))
+    text_box.configure(state="normal")
+    text_box.focus()
 
 
 # Widgets
@@ -58,7 +80,7 @@ text_box.focus()
 quit_button = ttk.Button(frame, text="Quit", command=root.destroy)
 quit_button.grid(row=4, column=1, sticky="W")
 
-reset_button = ttk.Button(frame, text="Reset", command=countdown)
+reset_button = ttk.Button(frame, text="Reset", command=reset)
 reset_button.grid(row=4, column=2)
 
 text_box.bind("<KeyPress>", typing)
